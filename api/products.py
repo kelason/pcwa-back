@@ -25,6 +25,12 @@ class ProductUpdate(BaseModel):
 class Product(ProductBase):
     id: UUID
 
+class PaginatedProductResponse(BaseModel):
+    items: List[Product]
+    total: int
+    page: int
+    size: int
+
 # --- API Endpoints ---
 
 @router.post("/", response_model=Product, status_code=status.HTTP_201_CREATED)
@@ -41,16 +47,30 @@ async def create_product(product: ProductCreate):
     
     return response.data[0]
 
-@router.get("/", response_model=List[Product])
-async def list_products(category_id: Optional[UUID] = Query(None, description="Filter by category ID")):
-    """View a list of products with optional category_id filtering."""
-    query = supabase.table("products").select("*")
+@router.get("/", response_model=PaginatedProductResponse)
+async def list_products(
+    category_id: Optional[UUID] = Query(None, description="Filter by category ID"),
+    page: int = Query(1, ge=1, description="Page number")
+):
+    """View a list of products with optional category_id filtering, ordered by name, with pagination."""
+    page_size = 10
+    start = (page - 1) * page_size
+    end = start + page_size - 1
+
+    # Request count="exact" to get total results and order by product name
+    query = supabase.table("products").select("*", count="exact").order("name")
     
     if category_id:
         query = query.eq("category_id", str(category_id))
     
-    response = query.execute()
-    return response.data
+    response = query.range(start, end).execute()
+
+    return {
+        "items": response.data,
+        "total": response.count or 0,
+        "page": page,
+        "size": page_size
+    }
 
 @router.get("/category/{category_id}", response_model=List[Product])
 async def get_products_by_category(category_id: UUID):
