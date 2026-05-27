@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Literal
 from decimal import Decimal
 from uuid import UUID
 from fastapi import APIRouter, HTTPException, Query, status
@@ -50,24 +50,39 @@ async def create_product(product: ProductCreate):
 @router.get("/", response_model=PaginatedProductResponse)
 async def list_products(
     category_id: Optional[UUID] = Query(None, description="Filter by category ID"),
-    page: int = Query(1, ge=1, description="Page number")
+    page: int = Query(1, ge=1, description="Page number"),
+    sort_by: str = Query("name", description="Sort order: name, price_low, or price_high")
 ):
     """View a list of products with optional category_id filtering, ordered by name, with pagination."""
     page_size = 10
     start = (page - 1) * page_size
     end = start + page_size - 1
 
-    # Request count="exact" to get total results and order by product name
-    query = supabase.table("products").select("*", count="exact").order("name")
-    
-    if category_id:
-        query = query.eq("category_id", str(category_id))
-    
-    response = query.range(start, end).execute()
+    try:
+        # Initialize query builder
+        query = supabase.table("products").select("*", count="exact")
+
+        # 1. Apply Filters first
+        if category_id:
+            query = query.eq("category_id", str(category_id))
+
+        # 2. Apply Dynamic Sorting
+        if sort_by == "price_low":
+            query = query.order("price", desc=False)
+        elif sort_by == "price_high":
+            query = query.order("price", desc=True)
+        else:
+            query = query.order("name", desc=False) # Default to ascending for name
+
+        # 3. Apply Range and Execute
+        response = query.range(start, end).execute()
+    except Exception as e:
+        # Catch-all for database or execution errors to prevent ASGI worker crashes
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     return {
         "items": response.data,
-        "total": response.count or 0,
+        "total": response.count if response.count is not None else 0,
         "page": page,
         "size": page_size
     }
