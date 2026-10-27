@@ -4,8 +4,11 @@ from fastapi.exceptions import RequestValidationError
 from postgrest.exceptions import APIError
 
 from middleware.cors import setup_cors
+from api.auth_routes import router as auth_router
 from api.categories import router as categories_router
 from api.products import router as products_router
+from api.stats import router as stats_router
+from api.uploads import router as uploads_router
 
 app = FastAPI(
     title="Product Catalog API",
@@ -27,17 +30,21 @@ async def supabase_api_error_handler(request: Request, exc: APIError):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    """Catch Pydantic validation errors and print details for debugging."""
-    errors = exc.errors()
+    """Catch Pydantic validation errors and return them as JSON-safe detail
+    (ctx may hold Decimal values, which plain json cannot serialize)."""
+    from fastapi.encoders import jsonable_encoder
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={"detail": errors},
+        content={"detail": jsonable_encoder(exc.errors())},
     )
 
 # --- Include Routers ---
+app.include_router(auth_router)
 app.include_router(categories_router)
 app.include_router(products_router)
+app.include_router(stats_router)
+app.include_router(uploads_router)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=9000)

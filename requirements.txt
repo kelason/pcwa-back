@@ -3,3 +3,6 @@ supabase
 python-dotenv
 pydantic
 postgrest
+python-multipart
+pytest
+httpx

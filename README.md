@@ -16,11 +16,39 @@ The production API is accessible at: [https://pcwa-back.vercel.app/](https://pcw
 
 ## 🛠️ Features
 
-*   **Product Management:** Full CRUD operations for products including price and category association.
-*   **Pagination:** Built-in server-side pagination for product listings.
-*   **Filtering:** Filter products by specific categories.
-*   **Category Management:** Endpoint support for creating and retrieving product categories.
+*   **Product Management:** Full CRUD for products with rich fields (description, image_url, SKU, stock).
+*   **Search & Filtering:** Server-side name search, category, price-range and in-stock filters; sorting by name/price; pagination (10/page).
+*   **Category Management:** Create, rename, and guarded delete (409 while products still use the category).
+*   **Bulk & CSV:** Bulk delete (partial-success report), bulk re-categorize, CSV export/import with per-row failure report.
+*   **Dashboard Stats:** `GET /stats` with totals, average price, inventory value.
+*   **Image Upload:** `POST /uploads/product-image` to Supabase Storage (`product-images` bucket).
+*   **Auth:** Supabase Auth via `POST /auth/login`; every write requires a Bearer token, reads stay public.
+*   **Soft Delete & Audit:** Deletes move products to trash (`GET /products/trash`, restore, permanent delete); every mutation writes a `product_audit` row with the actor.
 *   **CORS Middleware:** Configurable CORS settings for secure frontend integration.
+
+## Architecture (layered)
+
+```
+main.py              FastAPI app, exception handlers, CORS (thin entry)
+api/                 HTTP layer only: parse -> service -> response
+  deps.py            Composition root (services built from repositories)
+services/            Business rules (category guard, bulk, CSV, stats, audit)
+repositories/        Supabase data access; the deleted_at predicate lives here only
+schemas/             Pydantic request/response models
+core/                config, lazy Supabase client, bearer-auth dependency
+middleware/          CORS setup
+supabase/migrations/ SQL to run in the Supabase SQL editor (fields, bucket, realtime, soft-delete/audit)
+tests/               pytest suite, credential-free (in-memory repositories)
+```
+
+Request flow: router (`api/`) -> service (`services/`) -> repository
+(`repositories/`) -> Supabase. Tests replace repositories and auth through
+FastAPI dependency overrides in `tests/conftest.py`, so no real Supabase
+project is needed: `venv/bin/python -m pytest -q`.
+
+Setup checklist in Supabase: run the four files in `supabase/migrations/` in
+order, create a staff user in Auth (used by `POST /auth/login`), and keep
+`SUPABASE_URL` / `SUPABASE_KEY` / `FRONTEND_URL` in `.env`.
 
 ## 📋 Prerequisites
 

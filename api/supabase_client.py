@@ -1,22 +1,10 @@
-import os
-from dotenv import load_dotenv
-from supabase import create_client, Client
+"""Backward-compatible shim. New code uses core.supabase_client."""
+from core.supabase_client import get_supabase_client
 
-# Load environment variables
-load_dotenv()
+__all__ = ["get_supabase_client", "supabase"]
 
-def get_supabase_client() -> Client:
-    """
-    Initializes and returns the Supabase client.
-    Handles potential URL malformation (PGRST125) by stripping redundant paths.
-    """
-    raw_url = os.getenv("SUPABASE_URL", "").strip().strip('"').strip("'")
-    url: str = raw_url.split("/rest/v1")[0].rstrip("/")
-    key: str = os.getenv("SUPABASE_KEY", "").strip().strip('"').strip("'")
-    
-    if not url or not key:
-        raise RuntimeError("SUPABASE_URL or SUPABASE_KEY is not set in environment")
-        
-    return create_client(url, key)
 
-supabase: Client = get_supabase_client()
+def __getattr__(name):
+    if name == "supabase":
+        return get_supabase_client()
+    raise AttributeError(name)
