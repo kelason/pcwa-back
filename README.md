@@ -4,7 +4,7 @@ A high-performance backend service for managing a product catalog and categories
 
 ## 🌐 Live API
 
-The production API is accessible at: [https://pcwa-back.vercel.app/](https://pcwa-back.vercel.app/)
+The production API is accessible at: [https://pcwa-back.vercel.app/docs](https://pcwa-back.vercel.app/docs)
 
 ## 🚀 Tech Stack
 
@@ -60,7 +60,7 @@ order, create a staff user in Auth (used by `POST /auth/login`), and keep
 1.  **Clone the repository:**
     ```bash
     git clone <repository-url>
-    cd cognizant-assesment-back
+    cd pcwa-back
     ```
 
 2.  **Create and activate a virtual environment:**
@@ -78,7 +78,7 @@ order, create a staff user in Auth (used by `POST /auth/login`), and keep
     Create a `.env` file in the root directory:
     ```env
     SUPABASE_URL="https://cckwqqijhshedzagymyu.supabase.co"
-    SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNja3dxcWlqaHNoZWR6YWd5bXl1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTgyOTI5MiwiZXhwIjoyMDk1NDA1MjkyfQ.C0NorDtFsfnn6m-kD4SWoPoCeZjdT2LK-STYkUhG9NY"
+    SUPABASE_KEY="YOUR_SUPABASE_KEY_HERE"
     FRONTEND_URL=http://localhost:5173
     ```
     *Note: The Supabase client automatically handles URL formatting, ensuring compatibility even if the URL contains redundant path segments.*
