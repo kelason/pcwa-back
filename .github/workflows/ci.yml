@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Pytest (credential-free)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Verify the app imports without credentials
+        run: python -c "from main import app; print(f'{len(app.routes)} routes')"
+
+      # tests/conftest.py overrides services and auth with in-memory
+      # repositories, so no SUPABASE_URL / SUPABASE_KEY secrets are needed.
+      - name: Run tests
+        run: python -m pytest tests/ -q
