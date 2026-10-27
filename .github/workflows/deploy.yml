@@ -46,6 +46,16 @@ jobs:
         with:
           node-version: 22
 
+      # `vercel build` runs the Python builder locally on this runner, and
+      # that builder shells out to `uv` (not preinstalled on GitHub runners).
+      - name: Set up Python (for the Vercel Python builder)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv (required by the Vercel Python builder)
+        run: pip install uv
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
