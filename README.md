@@ -4,7 +4,7 @@ A high-performance backend service for managing a product catalog and categories
 
 ## 🌐 Live API
 
-The production API is accessible at: [https://pcwa-back.vercel.app/](https://pcwa-back.vercel.app/)
+The production API is accessible at: [https://pcwa-back.vercel.app/docs](https://pcwa-back.vercel.app/docs)
 
 ## 🚀 Tech Stack
 
