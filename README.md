@@ -50,7 +50,7 @@ The production API is accessible at: [https://pcwa-back.vercel.app/](https://pcw
     Create a `.env` file in the root directory:
     ```env
     SUPABASE_URL="https://cckwqqijhshedzagymyu.supabase.co"
-    SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNja3dxcWlqaHNoZWR6YWd5bXl1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTgyOTI5MiwiZXhwIjoyMDk1NDA1MjkyfQ.C0NorDtFsfnn6m-kD4SWoPoCeZjdT2LK-STYkUhG9NY"
+    SUPABASE_KEY="YOUR_SUPABASE_KEY_HERE"
     FRONTEND_URL=http://localhost:5173
     ```
     *Note: The Supabase client automatically handles URL formatting, ensuring compatibility even if the URL contains redundant path segments.*
